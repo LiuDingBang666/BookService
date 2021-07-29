@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="icu.liuwisdom.core.dao.OrderDao">
+    <!--SQL片段  -->
+    <sql id="selectOrdersListWhere">
+        <where>
+            o.userid=u.userid
+            <if test="user!=null and user.name != null  and user.name!=''">
+                and o.userid in(SELECT userid FROM user WHERE name LIKE CONCAT('%',#{user.name},'%'))
+            </if>
+            <if test="paystate != -1">
+                and o.paystate=#{paystate}
+            </if>
+        </where>
+    </sql>
+    <!--新增订单-->
+    <insert id="insertOrder" parameterType="Orders">
+                insert  into orders values (#{orderid},#{user.userid},#{money},#{receiverAddress},#{receiverPhone},#{receiverName},
+                #{paystate},CURRENT_TIMESTAMP)
+        </insert>
+
+    <!--根据用户信息查询订单-->
+    <select id="selectOrderByUser" parameterType="User" resultType="Orders">
+        select  * from orders where userid=#{userid}
+    </select>
+
+    <!--根据订单信息查询订单-->
+    <select id="selectOrderByInfo" parameterType="Orders" resultMap="OrderWithUser">
+        SELECT o.*,u.name as 'name' FROM orders o,user u
+        <include refid="selectOrdersListWhere"/>
+        ORDER BY ordertime desc
+        <!-- 执行分页查询 -->
+        <if test="start !=null and rows != null">
+            limit #{start},#{rows}
+        </if>
+    </select>
+    <resultMap id="OrderWithUser" type="Orders">
+        <id property="orderid" column="orderid"/>
+        <result property="userid" column="userid"/>
+        <result property="money" column="money"/>
+        <result property="receiverAddress" column="receiverAddress"/>
+        <result property="reveicerPhone" column="reveicerPhone"/>
+        <result property="receiverName" column="receiverName"/>
+        <result property="paystate" column="paystate"/>
+        <result property="ordertime" column="ordertime"/>
+        <!--一对一关联映射-->
+        <association property="user" javaType="User">
+
+            <result property="name" column="name"/>
+        </association>
+    </resultMap>
+
+    <!--查询订单信息数量-->
+    <select id="selectOrderCount" parameterType="orders" resultType="Integer">
+        SELECT count(*) FROM orders o,user u
+        <include refid="selectOrdersListWhere"/>
+    </select>
+    <!--根据订单ID查询订单和订单项信息-->
+    <select id="selectOrderByID" resultMap="OrderWithOrdersItemResult" parameterType="String">
+
+        SELECT o.orderid as
+        id,o.userid,o.money,o.receiverAddress,o.reveicerPhone,o.receiverName,o.paystate,o.ordertime,oi.*,b.* FROM orders
+        o,orderitem oi,book b
+        WHERE o.orderid=#{id}
+        AND o.orderid=oi.orderid
+        AND b.bookid=oi.bookid
+    </select>
+
+    <resultMap id="OrderWithOrdersItemResult" type="Orders">
+        <id property="orderid" column="id"/>
+        <result property="userid" column="userid"/>
+        <result property="money" column="money"/>
+        <result property="receiverAddress" column="receiverAddress"/>
+        <result property="reveicerPhone" column="reveicerPhone"/>
+        <result property="receiverName" column="receiverName"/>
+        <result property="paystate" column="paystate"/>
+        <result property="ordertime" column="ordertime"/>
+        <!--一对多关联映射-->
+        <collection property="orderItems" ofType="OrderItem">
+            <result property="buynum" column="buynum"/>
+            <result property="book.bookid" column="bookid"/>
+            <result property="book.name" column="name"/>
+            <result property="book.price" column="price"/>
+            <result property="book.category" column="category"/>
+            <result property="book.num" column="num"/>
+            <result property="book.imgurl" column="imgurl"/>
+            <result property="book.description" column="imgurl"/>
+            <result property="book.addtime" column="addtime"/>
+            <result property="book.buynum" column="buynum1"/>
+        </collection>
+    </resultMap>
+    <!--根据订单ID删除订单-->
+    <delete id="deleteOrderById" parameterType="String">
+        delete  from orders where orderid=#{id}
+    </delete>
+
+    <!--根据订单ID修改支付状态为已支付-->
+    <update id="updateOrderState" parameterType="String">
+        update orders set paystate=1 where  orderid=#{id}
+    </update>
+</mapper>

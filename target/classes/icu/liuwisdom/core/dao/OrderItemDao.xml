@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="icu.liuwisdom.core.dao.OrderItemDao">
+    <!--新增订单项-->
+    <insert id="insertOrderItem" parameterType="OrderItem">
+        insert  into orderitem values (#{orders.orderid},#{book.bookid},#{buynum})
+    </insert>
+    <!--根据订单编号删除订单项-->
+    <delete id="deleteOrderItem" parameterType="String">
+        delete  from orderitem where orderid=#{id}
+    </delete>
+</mapper>

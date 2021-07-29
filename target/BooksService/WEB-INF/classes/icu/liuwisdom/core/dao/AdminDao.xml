@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="icu.liuwisdom.core.dao.AdminDao">
+    <!--SQL片段  -->
+    <sql id="selectAdminListWhere">
+        <where>
+            <if test="role != null  and role!=''">
+                role= #{role}
+            </if>
+            <if test="sex != null  and sex!=''">
+                and sex = #{sex}
+            </if>
+            <if test="name != null and name!=''">
+                and name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </sql>
+    <!--获取所有管理员信息-->
+    <select id="selectAdminList" parameterType="User" resultType="User">
+        select * from user
+        <include refid="selectAdminListWhere"></include>
+        <!-- 执行分页查询 -->
+        <if test="start !=null and rows != null">
+            limit #{start},#{rows}
+        </if>
+    </select>
+    <!--管理员总数-->
+    <select id="selectAdminListCount" parameterType="User" resultType="Integer">
+        select count(*) from user
+        <include refid="selectAdminListWhere"></include>
+    </select>
+    <!--新增用户信息-->
+    <insert id="insertUser" parameterType="User">
+        insert  into user(name,tel,password,sex,role,signature)
+        values (#{name},#{tel},#{password},#{sex},#{role},#{signature})
+    </insert>
+    <!--根据手机号查询用户信息-->
+    <select id="selectUser" parameterType="String" resultType="User">
+         select  * from user  where tel=#{tel}
+    </select>
+    <!--根据手机号查询用户信息-->
+    <delete id="deleteUserByTel">
+        delete from  user  where tel=#{tel}
+    </delete>
+    <!--根据手机号修改用户信息-->
+    <update id="alterUserByTel">
+        update user
+        <set>
+            <if test="user.name !=null and user.name !=''">
+                name=#{user.name},
+            </if>
+            <if test="user.password !=null and user.password !=''">
+                password=#{user.password},
+            </if>
+            <if test="user.signature !=null and user.signature !=''">
+                signature=#{user.signature},
+            </if>
+            <if test="user.receiverAddress !=null and user.receiverAddress !=''">
+                receiverAddress=#{user.receiverAddress}
+            </if>
+        </set>
+        where tel=#{oldtel}
+    </update>
+
+
+    <!--根据用户名和密码查找用户-->
+    <select id="selectUserByNameAndPassword" parameterType="User"
+            resultType="User">
+        select  * from user where
+        name=#{name} and  password=#{password}
+        and role='管理员' and state=0
+    </select>
+</mapper>

@@ -1,0 +1,19 @@
+/* 导航栏 */
+#book-nav {
+	margin-top: 10px;
+}
+
+/* 轮播图 */
+/* #carousel{
+	border: 2px solid black;
+	border-radius: 5px;
+	
+} */
+
+
+
+/* input */
+.form-control{
+	width: 300px;
+	display: inline-block;
+}

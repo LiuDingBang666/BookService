@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="icu.liuwisdom.core.dao.BookDao">
+    <!--根据分类查询图书的SQL片段  -->
+    <sql id="selectBookListWhere">
+        <where>
+            <if test="category != null  and category!=''">
+                category=#{category}
+            </if>
+            <if test="name != null and name!=''">
+                and name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </sql>
+    <!--根据库存和销量查询图书的SQL片段-->
+    <sql id="selectHotBookListWhere">
+        <where>
+            <if test="category != null  and category!=''">
+                category=#{category}
+            </if>
+            <if test="name != null and name!=''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="1==1">
+                and buynum>0 and num>=0
+            </if>
+            ORDER BY buynum DESC,num ASC
+        </where>
+    </sql>
+    <!--获取所有图书信息-->
+    <select id="selectBookList" parameterType="Book" resultType="Book">
+        select * from book
+        <include refid="selectBookListWhere"></include>
+        <!-- 执行分页查询 -->
+        <if test="start !=null and rows != null">
+            limit #{start},#{rows}
+        </if>
+    </select>
+    <!--图书总数-->
+    <select id="selectBookListCount" parameterType="Book" resultType="Integer">
+        select count(*) from book
+        <include refid="selectBookListWhere"></include>
+    </select>
+    <!--图书分类-->
+    <select id="selectBookTypes" resultType="String">
+        SELECT category from book GROUP BY category
+    </select>
+    <!--新增图书-->
+    <insert id="insertBook" parameterType="Book">
+        insert  into book(bookid,name,price,category,num,imgurl,description)
+        values(#{bookid},#{name},#{price},#{category},#{num},#{imgurl},#{description})
+    </insert>
+    <!--删除图书-->
+    <delete id="deleteBook" parameterType="String">
+        delete from book where bookid=#{bookid}
+    </delete>
+
+    <!--根据id获取图书信息-->
+    <select id="selectBookById" parameterType="String" resultType="Book">
+        select * from book where  bookid=#{bookid}
+    </select>
+
+    <!--根据id修改图书信息-->
+    <update id="updateBookById" parameterType="Book">
+        update book
+        <set>
+            <if test="name!=null and name!=''">
+                name=#{name},
+            </if>
+            <if test="price!=null ">
+                price=#{price},
+            </if>
+            <if test="category!=null and category!=''">
+                category=#{category},
+            </if>
+            <if test="num!=null ">
+                num=#{num},
+            </if>
+            <if test="imgurl!=null and imgurl!=''">
+                imgurl=#{imgurl},
+            </if>
+            <if test="description!=null and description!=''">
+                description=#{description},
+            </if>
+        </set>
+        <where>
+            bookid=#{bookid}
+        </where>
+    </update>
+    <!--获取热销图书-->
+    <select id="selectHotBooks" resultType="Book">
+        SELECT * from book ORDER BY buynum desc limit 0,5
+    </select>
+
+    <!--根据图书编号查询图书并且判断库存是否足够-->
+    <select id="selectBookByIdAndStock" resultType="Book" parameterType="String">
+        select * from book where  bookid=#{id} and num>0;
+    </select>
+    <!--随机查询图书-->
+    <select id="selectRandomBook" resultType="Book">
+            select * from book  ORDER BY  rand()limit 18 ;
+    </select>
+    <!--修改图书表中库存数量-->
+    <update id="updateBookNum" parameterType="OrderItem">
+        update book set num=num-#{buynum} where bookid=#{book.bookid}
+    </update>
+
+    <!--根据图书编号修改图书库存数量-->
+    <update id="updateBookNumById">
+        update book set num=num+#{num} where bookid=#{id}
+    </update>
+
+    <!--修改图书销量-->
+    <update id="updateBookBuyNum" parameterType="Book">
+         update book set buynum=buynum+#{buynum} where bookid=#{bookid}
+    </update>
+
+    <!--查询图书库存紧张且正在热销的图书-->
+    <select id="selectHotSellBook" resultType="Book" parameterType="Book">
+        SELECT * FROM book
+        <include refid="selectHotBookListWhere"/>
+        <!-- 执行分页查询 -->
+        <!-- 执行分页查询 -->
+        <if test="start !=null and rows != null">
+            limit #{start},#{rows}
+        </if>
+    </select>
+    <!--查询图书库存紧张且正在热销的图书总数量-->
+    <select id="selectHotSellBookNum" resultType="Integer" parameterType="Book">
+        SELECT count(*) FROM book
+        <include refid="selectHotBookListWhere"/>
+    </select>
+</mapper>
+

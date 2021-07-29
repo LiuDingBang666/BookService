@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="icu.liuwisdom.core.dao.SuggestDao">
+    <!--SQL片段  -->
+    <sql id="selectSuggestListWhere">
+        <where>
+            <if test="content != null and content!=''">
+                content like concat('%',#{content},'%')
+            </if>
+        </where>
+    </sql>
+    <!--获取所有用户建议信息-->
+    <select id="selectSuggestList" parameterType="Suggest" resultType="Suggest">
+        select * from suggest
+        <include refid="selectSuggestListWhere"/>
+        order by time desc
+        <!-- 执行分页查询 -->
+        <if test="start !=null and rows != null">
+            limit #{start},#{rows}
+        </if>
+    </select>
+
+    <!--查询用户建议信息数量-->
+    <select id="selectSuggestListCount" resultType="Integer" parameterType="Suggest">
+        select count(*) from
+        suggest
+        <include refid="selectSuggestListWhere"/>
+        order by time desc
+    </select>
+
+    <!--删除用户建议信息-->
+    <delete id="deleteSuggest" parameterType="Integer">
+        delete  from suggest where  id=#{id}
+    </delete>
+
+    <!--新增用户建议-->
+    <insert id="insertSuggest" parameterType="Suggest">
+        insert  into suggest(content,proposer) values (#{content},#{proposer})
+    </insert>
+</mapper>

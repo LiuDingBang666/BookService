@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="icu.liuwisdom.core.dao.UserDao">
+    <!--判断该手机号是否已经存在-->
+    <select id="selectHasTel" parameterType="String" resultType="User">
+        select  * from user where  tel=#{tel}
+    </select>
+
+    <!--新增用户-->
+    <insert id="insertUser" parameterType="User">
+            insert  into user(name,tel,password,role) values (#{name},#{tel},#{password},'用户')
+    </insert>
+    <!--根据手机号/昵称和密码查询用户-->
+    <select id="selectUser" parameterType="User" resultType="User">
+        select * from user where tel=#{tel}  and password=#{password} and role='用户' and  state=0
+    </select>
+    <!--根据用户id查询用户信息-->
+    <select id="selectUserById" parameterType="Integer" resultType="User">
+        select * from  userid=#{id}
+    </select>
+
+    <!--根据手机号修改用户信息-->
+    <update id="updateUserInfoByTel">
+        update user
+        <set>
+            <if test="user.name !=null and user.name !=''">
+                name=#{user.name},
+            </if>
+            <if test="user.password !=null and user.password !=''">
+                password=#{user.password},
+            </if>
+            <if test="user.signature !=null and user.signature !=''">
+                signature=#{user.signature},
+            </if>
+            <if test="user.password !=null and user.password !=''">
+                password=#{user.password},
+            </if>
+            <if test="user.birthday !=null">
+                birthday=#{user.birthday},
+            </if>
+            <if test="user.role !=null and user.role !=''">
+                role=#{user.role},
+            </if>
+            <if test="user.state !=null and user.state !=''">
+                state=#{user.state},
+            </if>
+            <if test="user.imgurl !=null and user.imgurl !=''">
+                imgurl=#{user.imgurl},
+            </if>
+            <if test="user.sex !=null and user.sex !=''">
+                sex=#{user.sex},
+            </if>
+            <if test="user.receiverAddress !=null and user.receiverAddress !=''">
+                receiverAddress=#{user.receiverAddress}
+            </if>
+        </set>
+        where tel=#{user.tel}
+    </update>
+</mapper>
